@@ -1,0 +1,97 @@
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!-- 彩色日志依赖的渲染类 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex"
+                    converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx"
+                    converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+
+    <property resource="application.yml"/>
+    <!-- 日志存放路径 -->
+    <property name="log.path" value="./diary"/>
+    <!-- 日志输出格式 -->
+    <property name="log.pattern"
+              value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%1.50t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <property name="file.log.pattern"
+              value="[%date{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] [%1.50t] [%logger:%line] --%mdc{client} %msg%n"/>
+    <!--    <springProperty scope="context" name="logFileName" source="spring.application.name" defaultValue="currentLog"/>-->
+    <!-- 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+            <!-- 记录日志的编码:此处设置字符集 - -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 全局日志输出 -->
+    <appender name="file_application" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/diary.txt</file>
+        <!-- 循环政策：基于时间创建日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 日志文件名格式 -->
+            <fileNamePattern>${log.path}/history/diary.%d{yyyy-MM-dd}-%i.txt</fileNamePattern>
+            <!-- 每个文件最大值 -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 最多保存30天的日志 -->
+            <maxHistory>30</maxHistory>
+            <!-- 最大限制 -->
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>${file.log.pattern}</pattern>
+            <!-- 记录日志的编码:此处设置字符集 - -->
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 系统error日志输出 -->
+    <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/error.txt</file>
+        <!-- 循环政策：基于时间创建日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 日志文件名格式 -->
+            <fileNamePattern>${log.path}/history/error.%d{yyyy-MM-dd}-%i.txt</fileNamePattern>
+            <!-- 每个文件最大值 -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 最多保存30天的日志 -->
+            <maxHistory>30</maxHistory>
+            <!-- 最大限制 -->
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${file.log.pattern}</pattern>
+            <!-- 记录日志的编码:此处设置字符集 - -->
+            <charset>UTF-8</charset>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!-- 过滤的级别 -->
+            <level>ERROR</level>
+            <!-- 匹配时的操作：接收（记录） -->
+            <onMatch>ACCEPT</onMatch>
+            <!-- 不匹配时的操作：拒绝（不记录） -->
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 系统模块日志级别控制  -->
+    <logger name="com.org.sys" level="debug"/>
+    <!-- Spring日志级别控制  -->
+    <logger name="org.springframework" level="warn"/>
+    <logger name="com.zaxxer.hikari" level="warn"/>
+    <logger name="io.lettuce.core" level="warn"/>
+    <logger name="io.seata.core" level="warn"/>
+    <logger name="com.netflix.loadbalancer" level="warn"/>
+
+    <root level="info">
+        <appender-ref ref="console"/>
+    </root>
+
+    <!--系统操作日志-->
+    <root level="info">
+        <appender-ref ref="file_application"/>
+        <appender-ref ref="file_error"/>
+    </root>
+</configuration>
